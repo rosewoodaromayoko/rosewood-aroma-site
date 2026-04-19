@@ -499,9 +499,11 @@ footer {
   text-decoration: none;
   max-width: 46%;
   transition: color 0.3s;
+  display: block;
 }
 
-.blog-nav-next { text-align: right; margin-left: auto; }
+.blog-nav-next { text-align: right; }
+.blog-nav-placeholder { flex: 1; }
 
 .blog-nav-dir {
   display: block;
