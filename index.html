@@ -210,10 +210,16 @@
         <span class="contact-link-icon"><i class="fa-brands fa-instagram" style="background:linear-gradient(45deg,#f58529,#dd2a7b,#8134af);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:1.4rem;"></i></span>
         <span data-en="Contact via Instagram">Instagramでお問い合わせ</span>
       </a>
-      <a class="contact-link" href="https://mail.google.com/mail/?view=cm&to=rosewoodaroma2025.9.5@gmail.com" target="_blank" rel="noopener noreferrer">
-        <span class="contact-link-icon">✉️</span>
-        <span data-en="Contact via Email">メールでお問い合わせ</span>
-      </a>
+      <div class="contact-link" style="cursor:default; flex-direction:column; align-items:flex-start; gap:0.6rem;">
+        <div style="display:flex; align-items:center; gap:1rem;">
+          <span class="contact-link-icon">✉️</span>
+          <span style="font-size:0.88rem; color:var(--text-dark); letter-spacing:0.03em;">rosewoodaroma2025.9.5@gmail.com</span>
+        </div>
+        <button onclick="navigator.clipboard.writeText('rosewoodaroma2025.9.5@gmail.com').then(()=>{this.textContent='コピーしました！';setTimeout(()=>{this.textContent='メールアドレスをコピー'},2000)})"
+          style="margin-left:2.2rem; background:var(--green-dark); color:white; border:none; padding:0.4rem 1rem; font-size:0.78rem; font-family:inherit; letter-spacing:0.08em; cursor:pointer; border-radius:2px;">
+          メールアドレスをコピー
+        </button>
+      </div>
     </div>
   </div>
 </section>
