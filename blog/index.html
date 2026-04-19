@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スタッフブログ | Rosewood Aroma</title>
+  <meta name="description" content="Rosewood Aromaセラピストによるブログ。体のこと、暮らしのこと、白馬の日々のこと。">
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      Rosewood Aroma
+      <span>HAKUBA, NAGANO</span>
+    </a>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="メニューを開く">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="../index.html#menu">メニュー</a></li>
+      <li><a href="../index.html#access">アクセス</a></li>
+      <li><a href="../blog/">ブログ</a></li>
+      <li><a href="../index.html#contact">お問い合わせ</a></li>
+    </ul>
+  </div>
+</nav>
+
+<section class="blog-post-page">
+  <div class="blog-index-wrap">
+
+    <p class="section-label">Staff Blog</p>
+    <h1 class="blog-post-title" style="font-size: clamp(1.5rem, 3vw, 2rem); margin-bottom: 0.4rem;">スタッフブログ</h1>
+    <p style="font-size: 0.82rem; color: var(--text-light); font-style: italic; margin-bottom: 3rem;">From our therapist</p>
+
+    <ul class="blog-list">
+      <li class="blog-list-item">
+        <p class="blog-list-date">2026.04.04</p>
+        <a href="post1.html" class="blog-list-title">無理しない働き方に変えてよかったこと</a>
+      </li>
+      <li class="blog-list-item">
+        <p class="blog-list-date">2026.04.03</p>
+        <a href="post2.html" class="blog-list-title">疲れが抜けない人に共通してること</a>
+      </li>
+      <li class="blog-list-item">
+        <p class="blog-list-date">2026.04.02</p>
+        <a href="post3.html" class="blog-list-title">年齢とともに体が一気に変わったと感じた瞬間</a>
+      </li>
+    </ul>
+
+    <a href="../index.html" class="blog-back" style="margin-top: 3rem;">← トップに戻る</a>
+
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2026 Rosewood Aroma</p>
+  <p>〒399-9301 長野県北安曇郡白馬村</p>
+</footer>
+
+<script>
+  function toggleMenu() {
+    document.getElementById('navLinks').classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>
