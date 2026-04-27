@@ -1,0 +1,13 @@
+{
+  "name": "Rosewood Aroma 英会話練習",
+  "short_name": "英会話練習",
+  "description": "サロンの英会話を練習するアプリ",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fdf8f6",
+  "theme_color": "#c4856a",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

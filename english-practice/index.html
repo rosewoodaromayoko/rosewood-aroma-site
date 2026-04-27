@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>English Practice | Rosewood Aroma</title>
+<!-- PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="英会話練習">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c4856a">
+<style>
+:root {
+  --rose: #c4856a;
+  --rose-light: #f5e6df;
+  --rose-dark: #8b5a47;
+  --green: #5a9b7a;
+  --bg: #fdf8f6;
+  --text: #3d2b26;
+  --muted: #9b8783;
+  --shadow: 0 2px 10px rgba(0,0,0,0.08);
+  --r: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans JP', sans-serif;
+  background: var(--bg); color: var(--text);
+  max-width: 500px; margin: 0 auto; min-height: 100vh; overflow-x: hidden;
+}
+.header {
+  background: var(--rose); color: white;
+  padding: 14px 16px 10px; text-align: center;
+  position: sticky; top: 0; z-index: 200;
+  box-shadow: 0 2px 8px rgba(196,133,106,0.3);
+}
+.header h1 { font-size: 17px; font-weight: 700; }
+.header p { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+.tab-nav {
+  display: flex; background: white;
+  border-bottom: 1px solid #eed8d0;
+  position: sticky; top: 62px; z-index: 199;
+}
+.tab-btn {
+  flex: 1; padding: 11px 4px 9px;
+  border: none; background: none;
+  font-size: 12px; color: var(--muted); cursor: pointer;
+  border-bottom: 3px solid transparent; transition: all 0.2s; font-weight: 500;
+}
+.tab-btn.active { color: var(--rose); border-bottom-color: var(--rose); font-weight: 700; }
+.screen { display: none; padding: 14px 14px 100px; }
+.screen.active { display: block; }
+
+.ctrl-bar {
+  background: white; border-radius: var(--r);
+  padding: 14px; margin-bottom: 14px; box-shadow: var(--shadow);
+}
+.mode-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.mode-btn {
+  flex: 1; padding: 10px 6px;
+  border: 2px solid var(--rose-light); border-radius: 10px;
+  background: white; font-size: 13px; cursor: pointer;
+  color: var(--muted); transition: all 0.2s; font-weight: 500;
+}
+.mode-btn.active { background: var(--rose); border-color: var(--rose); color: white; font-weight: 700; }
+.ctrl-row { display: flex; align-items: center; gap: 10px; }
+.big-btn {
+  width: 50px; height: 50px; border-radius: 50%; border: none;
+  color: white; font-size: 20px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: transform 0.1s;
+}
+.big-btn:active { transform: scale(0.93); }
+.play-btn { background: var(--rose); box-shadow: 0 4px 12px rgba(196,133,106,0.4); }
+.stop-btn { background: #d94f4f; box-shadow: 0 4px 12px rgba(217,79,79,0.3); }
+.ctrl-info { flex: 1; min-width: 0; }
+.ctrl-status { font-size: 13px; color: var(--muted); }
+.prog-bar { height: 4px; background: var(--rose-light); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.prog-fill { height: 100%; background: var(--rose); border-radius: 2px; transition: width 0.4s; }
+.speed-row { display: flex; gap: 6px; align-items: center; margin-top: 10px; }
+.speed-label { font-size: 12px; color: var(--muted); flex-shrink: 0; }
+.speed-btn {
+  padding: 5px 10px; border-radius: 8px;
+  border: 1px solid var(--rose-light); background: white;
+  font-size: 12px; cursor: pointer; color: var(--muted); transition: all 0.15s;
+}
+.speed-btn.active { background: var(--rose-light); border-color: var(--rose); color: var(--rose); font-weight: 700; }
+
+.shadow-prompt {
+  display: none; text-align: center;
+  background: #fff3f0; border: 2px solid var(--rose);
+  border-radius: 12px; padding: 14px; margin-bottom: 14px;
+}
+.shadow-prompt.show { display: block; }
+.shadow-prompt .s-mic { font-size: 30px; }
+.shadow-prompt .s-text { font-size: 15px; font-weight: 700; color: var(--rose); margin: 4px 0; }
+.shadow-prompt .s-count { font-size: 32px; font-weight: 900; color: var(--rose-dark); }
+
+.section-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+  color: var(--rose); text-transform: uppercase; padding: 12px 4px 6px;
+}
+.conv-line {
+  display: flex; gap: 8px; margin-bottom: 7px;
+  padding: 10px 12px; border-radius: 12px;
+  cursor: pointer; transition: all 0.15s;
+}
+.conv-line.yoko { background: #f5e6df; }
+.conv-line.customer { background: #ddf0e8; flex-direction: row-reverse; }
+.conv-line.note { background: transparent; border: 1px dashed #ddd; }
+.conv-line.hl { box-shadow: 0 0 0 2px var(--rose); }
+.spk-dot {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--rose); color: white; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.customer .spk-dot { background: var(--green); }
+.note .spk-dot { background: #bbb; font-size: 14px; }
+.conv-text { font-size: 15px; line-height: 1.5; flex: 1; }
+.customer .conv-text { text-align: right; }
+.note .conv-text { font-size: 13px; color: var(--muted); font-style: italic; }
+
+.cat-card {
+  background: white; border-radius: var(--r);
+  padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; transition: all 0.15s;
+}
+.cat-card:active { transform: scale(0.98); }
+.cat-icon { font-size: 24px; width: 44px; text-align: center; flex-shrink: 0; }
+.cat-info { flex: 1; }
+.cat-title { font-size: 15px; font-weight: 700; }
+.cat-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.cat-arrow { color: var(--muted); font-size: 20px; }
+
+.phrase-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.back-btn {
+  padding: 8px 14px; border-radius: 10px; border: none;
+  background: var(--rose-light); color: var(--rose);
+  font-size: 14px; font-weight: 700; cursor: pointer;
+}
+.ph-title { font-size: 15px; font-weight: 700; flex: 1; }
+.phrase-sub-hd {
+  font-size: 12px; font-weight: 700; color: var(--rose-dark);
+  padding: 10px 2px 4px;
+  border-bottom: 1px solid var(--rose-light); margin-bottom: 6px;
+}
+.phrase-item {
+  background: white; border-radius: 12px;
+  padding: 13px 14px; margin-bottom: 7px; box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; transition: all 0.15s; border: 2px solid transparent;
+}
+.phrase-item:active { transform: scale(0.99); }
+.phrase-item.hl { border-color: var(--rose); }
+.ph-en { font-size: 15px; flex: 1; line-height: 1.4; }
+.ph-note { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.ph-icon { font-size: 22px; color: var(--rose); flex-shrink: 0; }
+
+.vocab-group { margin-bottom: 20px; }
+.vocab-group-title {
+  font-size: 13px; font-weight: 700; color: var(--rose-dark);
+  padding: 6px 0; border-bottom: 2px solid var(--rose-light); margin-bottom: 8px;
+}
+.vocab-item {
+  display: flex; align-items: center; background: white;
+  border-radius: 10px; padding: 12px 14px; margin-bottom: 6px;
+  box-shadow: var(--shadow); cursor: pointer; gap: 10px;
+}
+.vocab-item:active { transform: scale(0.99); }
+.vocab-en { font-size: 15px; font-weight: 600; flex: 1; }
+.vocab-ja { font-size: 13px; color: var(--muted); text-align: right; }
+.vocab-icon { font-size: 18px; color: var(--rose); flex-shrink: 0; }
+
+.tip-card {
+  background: white; border-radius: var(--r);
+  padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow);
+  border-left: 4px solid var(--rose);
+}
+.tip-card h3 { font-size: 14px; font-weight: 700; color: var(--rose-dark); margin-bottom: 8px; }
+.tip-card p { font-size: 14px; line-height: 1.7; }
+
+.phrase-view { display: none; }
+.phrase-view.show { display: block; }
+.cat-view.hide { display: none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🌹 English Practice</h1>
+  <p>Rosewood Aroma — サロン英会話練習アプリ</p>
+</div>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('conv')">📖 会話</button>
+  <button class="tab-btn" onclick="showTab('phrase')">💬 フレーズ</button>
+  <button class="tab-btn" onclick="showTab('vocab')">📝 単語</button>
+  <button class="tab-btn" onclick="showTab('tips')">💡 ヒント</button>
+</nav>
+
+<div id="screen-conv" class="screen active">
+  <div class="ctrl-bar">
+    <div class="mode-row">
+      <button class="mode-btn active" id="conv-m-listen" onclick="setConvMode('listen')">🎧 聞き流し</button>
+      <button class="mode-btn" id="conv-m-shadow" onclick="setConvMode('shadow')">🎤 シャドーイング</button>
+    </div>
+    <div class="ctrl-row">
+      <button class="big-btn play-btn" id="conv-play" onclick="toggleConvPlay()">▶</button>
+      <div class="ctrl-info">
+        <div class="ctrl-status" id="conv-status">▶ で全文再生 / 各行タップで単独再生</div>
+        <div class="prog-bar"><div class="prog-fill" id="conv-prog" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="speed-row">
+      <span class="speed-label">速度：</span>
+      <button class="speed-btn" data-speed="0.7" onclick="setSpeed(0.7)">ゆっくり</button>
+      <button class="speed-btn active" data-speed="1.0" onclick="setSpeed(1.0)">ふつう</button>
+      <button class="speed-btn" data-speed="1.3" onclick="setSpeed(1.3)">はやい</button>
+    </div>
+  </div>
+  <div class="shadow-prompt" id="conv-shadow">
+    <div class="s-mic">🎤</div>
+    <div class="s-text">あなたの番！ リピートしてみよう</div>
+    <div class="s-count" id="conv-count">4</div>
+  </div>
+  <div id="conv-lines"></div>
+</div>
+
+<div id="screen-phrase" class="screen">
+  <div class="cat-view" id="cat-view">
+    <div id="cat-list"></div>
+  </div>
+  <div class="phrase-view" id="phrase-view">
+    <div class="phrase-header">
+      <button class="back-btn" onclick="backToCats()">← 戻る</button>
+      <div class="ph-title" id="ph-title"></div>
+    </div>
+    <div class="ctrl-bar">
+      <div class="mode-row">
+        <button class="mode-btn" id="ph-m-listen" onclick="setPhMode('listen')">🎧 聞き流し</button>
+        <button class="mode-btn" id="ph-m-shadow" onclick="setPhMode('shadow')">🎤 シャドーイング</button>
+        <button class="mode-btn active" id="ph-m-tap" onclick="setPhMode('tap')">👆 タップ</button>
+      </div>
+      <div class="ctrl-row">
+        <button class="big-btn play-btn" id="ph-play" onclick="togglePhPlay()" style="display:none">▶</button>
+        <div class="ctrl-info">
+          <div class="ctrl-status" id="ph-status">フレーズをタップして再生</div>
+          <div class="prog-bar"><div class="prog-fill" id="ph-prog" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="speed-row">
+        <span class="speed-label">速度：</span>
+        <button class="speed-btn" data-speed="0.7" onclick="setSpeed(0.7)">ゆっくり</button>
+        <button class="speed-btn active" data-speed="1.0" onclick="setSpeed(1.0)">ふつう</button>
+        <button class="speed-btn" data-speed="1.3" onclick="setSpeed(1.3)">はやい</button>
+      </div>
+    </div>
+    <div class="shadow-prompt" id="ph-shadow">
+      <div class="s-mic">🎤</div>
+      <div class="s-text">あなたの番！ リピートしてみよう</div>
+      <div class="s-count" id="ph-count">4</div>
+    </div>
+    <div id="ph-list"></div>
+  </div>
+</div>
+
+<div id="screen-vocab" class="screen">
+  <div id="vocab-list"></div>
+</div>
+
+<div id="screen-tips" class="screen">
+  <div id="tips-list"></div>
+</div>
+
+<script>
+const CONV = [
+  { sec:"はじめのあいさつ", sp:'Y', t:"Good morning. Good afternoon." },
+  { sp:'Y', t:"Hello, I'm Yoko." },
+  { sp:'C', t:"Hello, I'm Sehrish." },
+  { sp:'Y', t:"Do you have a reservation?" },
+  { sp:'C', t:"Yes, I do." },
+  { sec:"ご案内", sp:'Y', t:"Ok, thank you. Please take off your shoes and put them here. Here are some slippers for you to wear." },
+  { sp:'Y', t:"Please head this way up to the second floor." },
+  { sp:'N', t:"（2階に到着）" },
+  { sp:'Y', t:"Please have a seat and fill out the form." },
+  { sp:'Y', t:"Also, just to let you know, we take payment by cash, card, or PayPay." },
+  { sec:"問診票の記入", sp:'Y', t:"Please fill out the following details: Name, Address, date of birth, type of work, nationality, medical history, allergies, and when you last drank alcohol." },
+  { sp:'C', t:"Where do I write this?" },
+  { sp:'Y', t:"Please write it here." },
+  { sec:"施術前の確認", sp:'Y', t:"Before we start, are you ticklish anywhere? If so, please let me know if you want me to avoid those areas." },
+  { sp:'C', t:"Yes, under my armpit and abdomen." },
+  { sp:'Y', t:"I'm sorry, I don't understand. Could you point to them, please?" },
+  { sp:'C', t:"Ok!" },
+  { sp:'Y', t:"Thank you! Are there any points on your body that you would like me to focus on?" },
+  { sp:'C', t:"Yes, here and here." },
+  { sp:'Y', t:"Thank you. Lastly, please sign here and then we will begin." },
+  { sp:'C', t:"Ok, thank you!" },
+  { sec:"マッサージ", sp:'Y', t:"Ok, thank you for filling out the form. Please lay down here, face down, and relax. Place your arms like this. You can place your hands here if you like, or wherever is most comfortable." },
+  { sp:'C', t:"Is this ok?" },
+  { sp:'Y', t:"Yes, that's perfect!" },
+  { sp:'Y', t:"Are you comfortable? Not too hot? Not too cold?" },
+  { sp:'C', t:"Yes, I'm fine, thank you." },
+  { sp:'Y', t:"Please lift your head slightly. What pressure would you like? Soft, medium, or hard?" },
+  { sp:'C', t:"Hard, please!" },
+  { sp:'Y', t:"Ok, let me know if you feel pain and I will reduce the pressure." },
+  { sp:'C', t:"Ok, thank you!" },
+  { sp:'C', t:"Oh, that feels good!" },
+  { sp:'Y', t:"Would you like me to focus on this area more? Or less?" },
+  { sp:'C', t:"More, please." },
+  { sp:'Y', t:"Is this ok? Are you ok?" },
+  { sp:'Y', t:"Can I press your eyes?" },
+  { sp:'C', t:"Yes, you can." },
+  { sec:"施術の終わり", sp:'Y', t:"We have about 5 minutes left. Are there any areas you would like me to go over again before we finish?" },
+  { sp:'C', t:"No, everything is ok, thank you." },
+  { sp:'Y', t:"Ok, thank you. Please sit up and we will finish up." },
+  { sp:'C', t:"Ok." },
+  { sp:'Y', t:"Thank you very much, that's all for today. Please follow me to complete the payment." },
+  { sp:'C', t:"Ok, thank you." },
+  { sec:"お飲み物・お会計", sp:'Y', t:"Before you go, would you like to have some tea? Or water? We have still or sparkling." },
+  { sp:'C', t:"Tea, please!" },
+  { sp:'Y', t:"Thank you! Here you are." },
+  { sp:'Y', t:"How would you like to pay? Cash, card, or PayPay?" },
+  { sp:'C', t:"Cash, please." },
+  { sp:'Y', t:"Thank you for coming! If you would like to make another reservation, please use the Instagram page. I hope to see you again soon!" },
+];
+
+const CATS = [
+  { icon:"👋", title:"Greetings & first contact", ja:"あいさつ・最初の接客",
+    ph:[
+      { e:"Good morning.", n:"午前11時頃まで" },
+      { e:"Good afternoon.", n:"午前11時〜午後5時" },
+      { e:"Good evening.", n:"午後5時以降" },
+      { e:"Hello, I'm Yoko.", n:"自己紹介" },
+      { e:"Welcome!", n:"入店されたとき" },
+      { e:"How can I help you?" },
+      { e:"Do you have a reservation?", n:"予約確認" },
+      { e:"Is this your first time here?", n:"初めてのお客様に" },
+    ]},
+  { icon:"📅", title:"When they have a reservation", ja:"予約あり",
+    ph:[
+      { e:"Thank you. Please come in." },
+      { e:"May I have your name, please?" },
+      { e:"Please take off your shoes.", n:"入口で" },
+      { e:"You can put them here.", n:"靴置き場を指さして" },
+      { e:"Here are some slippers." },
+      { e:"Please follow me." },
+      { e:"This way, please." },
+      { e:"Please go up to the second floor." },
+      { e:"Please have a seat." },
+      { e:"Please fill out this form." },
+      { e:"Take your time.", n:"焦らせないように" },
+    ]},
+  { icon:"🚶", title:"When they don't have a reservation", ja:"予約なし",
+    subs:[
+      { lbl:"対応できる場合", ph:[
+        { e:"Yes, I have time now." },
+        { e:"Please come in." },
+        { e:"I can start in about 5 minutes." },
+      ]},
+      { lbl:"対応できない場合", ph:[
+        { e:"I'm sorry, I'm not available right now." },
+        { e:"I'm fully booked today." },
+        { e:"Could you make a reservation for another time?" },
+        { e:"Please book through our Instagram page." },
+        { e:"Let me show you how." },
+        { e:"Thank you. I look forward to seeing you." },
+      ]},
+    ]},
+  { icon:"💳", title:"Telling them about payment", ja:"お支払い方法のご案内",
+    ph:[
+      { e:"Just so you know, we accept cash, card, or PayPay.", n:"早めに伝えておく" },
+      { e:"We accept cash, card, and PayPay." },
+      { e:"How would you like to pay?", n:"会計のとき" },
+      { e:"Cash, card, or PayPay?" },
+    ]},
+  { icon:"📋", title:"Filling out the form", ja:"問診票の記入",
+    subs:[
+      { lbl:"記入をお願いするとき", ph:[
+        { e:"Please fill in your details." },
+        { e:"Please write your name here." },
+        { e:"Please write your address here." },
+        { e:"Please write your date of birth here." },
+        { e:"What kind of work do you do?" },
+        { e:"What is your nationality?" },
+        { e:"Do you have any medical history?" },
+        { e:"Any injuries or illnesses we should know about?" },
+        { e:"Do you have any allergies?" },
+        { e:"When did you last drink alcohol?" },
+        { e:"Please sign here." },
+        { e:"Thank you." },
+      ]},
+      { lbl:"どこに書くか聞かれたとき", ph:[
+        { e:"Please write it here." },
+        { e:"Right here, please." },
+        { e:"You can leave this part blank.", n:"任意の欄なら" },
+      ]},
+    ]},
+  { icon:"✋", title:"Before the massage begins", ja:"施術前の確認",
+    ph:[
+      { e:"Before we start, are you ticklish anywhere?" },
+      { e:"Any areas you want me to avoid?" },
+      { e:"Are there any areas you'd like me to focus on?" },
+      { e:"Where would you like me to focus?" },
+      { e:"Is there any area that hurts right now?" },
+      { e:"Please point to the area.", n:"言葉が通じないとき" },
+      { e:"Could you show me where?" },
+      { e:"Thank you. That's all, we can begin." },
+    ]},
+  { icon:"🛏️", title:"Getting comfortable on the table", ja:"ベッドでのご案内",
+    ph:[
+      { e:"Please lie down here." },
+      { e:"Please lie face down.", n:"うつ伏せ" },
+      { e:"Please lie face up.", n:"仰向け" },
+      { e:"Please relax." },
+      { e:"Please place your arms like this." },
+      { e:"You can put your hands here, or wherever feels comfortable." },
+      { e:"Is this position okay?" },
+      { e:"Let me adjust you a little." },
+      { e:"A little more like this." },
+      { e:"Perfect, thank you." },
+      { e:"Please lift your head a little." },
+      { e:"I'm putting a towel under your head." },
+      { e:"Are you comfortable?" },
+      { e:"Not too hot? Not too cold?" },
+      { e:"Let me know if you need anything." },
+    ]},
+  { icon:"💆", title:"Pressure & checking in", ja:"圧の確認・施術中のやりとり",
+    subs:[
+      { lbl:"こちらから声がけ", ph:[
+        { e:"What pressure would you like?" },
+        { e:"Soft, medium, or hard?" },
+        { e:"Like this?" },
+        { e:"Let me know if it hurts." },
+        { e:"I'll reduce the pressure." },
+        { e:"More pressure? Or less?" },
+        { e:"Is this okay?" },
+        { e:"Are you okay?" },
+        { e:"How does this feel?" },
+        { e:"Would you like me to do this area more? Or less?" },
+        { e:"Can I press your eyes?" },
+        { e:"Please tell me if anything is uncomfortable." },
+      ]},
+      { lbl:"お客様がよく言うこと（聞き取れるように）", ph:[
+        { e:"That feels good." },
+        { e:"It hurts a little." },
+        { e:"A bit harder, please." },
+        { e:"A bit softer, please." },
+        { e:"More here." },
+        { e:"That's enough there." },
+      ]},
+    ]},
+  { icon:"🙏", title:"Finishing the massage", ja:"施術の終わり",
+    ph:[
+      { e:"We have about 5 minutes left." },
+      { e:"Any areas you'd like me to go over again?" },
+      { e:"Anywhere else before we finish?" },
+      { e:"Okay, we're finished for today." },
+      { e:"Please take your time sitting up." },
+      { e:"Please sit up slowly." },
+      { e:"Thank you very much. That's all for today." },
+      { e:"Please follow me for the payment." },
+    ]},
+  { icon:"☕", title:"Offering a drink", ja:"お飲み物のご提供",
+    ph:[
+      { e:"Would you like something to drink?" },
+      { e:"Would you like tea or water?" },
+      { e:"Still or sparkling water?" },
+      { e:"Here you are." },
+      { e:"Please enjoy." },
+    ]},
+  { icon:"💰", title:"Payment & goodbye", ja:"お会計・お見送り",
+    ph:[
+      { e:"How would you like to pay?" },
+      { e:"Cash, card, or PayPay?" },
+      { e:"That will be [price] yen, please." },
+      { e:"Thank you very much." },
+      { e:"Here is your receipt." },
+      { e:"Would you like to book again?" },
+      { e:"You can book through our Instagram page." },
+      { e:"Let me show you how." },
+      { e:"Thank you for coming." },
+      { e:"I hope to see you again soon." },
+      { e:"Have a lovely day." },
+      { e:"Take care." },
+    ]},
+  { icon:"🤔", title:"When you don't understand", ja:"聞き取れないとき",
+    ph:[
+      { e:"I'm sorry, I don't understand.", n:"基本フレーズ" },
+      { e:"Could you say that again, please?" },
+      { e:"Could you speak a little more slowly, please?" },
+      { e:"Could you point to it, please?" },
+      { e:"One moment, please." },
+      { e:"Let me check." },
+      { e:"Just a moment." },
+      { e:"I'm sorry, my English isn't perfect." },
+      { e:"Thank you for your patience." },
+    ]},
+  { icon:"🧱", title:"Polite building blocks", ja:"丁寧な表現のパーツ",
+    ph:[
+      { e:"Please ___", n:"例：Please sit here. / Please relax." },
+      { e:"Could you ___, please?", n:"例：Could you lie down? / Could you point?" },
+      { e:"Would you like ___?", n:"例：Would you like tea? / More pressure?" },
+      { e:"I'm sorry, ___", n:"例：I'm sorry, I don't understand." },
+      { e:"Thank you for ___", n:"例：Thank you for coming. / Thank you for waiting." },
+      { e:"Let me ___", n:"例：Let me show you. / Let me check." },
+      { e:"Is this ___?", n:"例：Is this okay? / Is this comfortable?" },
+      { e:"Do you have ___?", n:"例：Do you have a reservation?" },
+      { e:"Are you ___?", n:"例：Are you comfortable? / Are you okay?" },
+    ]},
+];
+
+const VOCAB = [
+  { grp:"🫁 身体の部位 (Body Parts)", items:[
+    { e:"head, neck, shoulders", j:"頭、首、肩" },
+    { e:"back, lower back", j:"背中、腰" },
+    { e:"arm, elbow, hand, fingers", j:"腕、ひじ、手、指" },
+    { e:"chest, stomach (abdomen)", j:"胸、お腹" },
+    { e:"hip, leg, knee, ankle, foot", j:"お尻、脚、ひざ、足首、足" },
+    { e:"armpit", j:"脇の下" },
+  ]},
+  { grp:"💭 気持ち・感覚 (Feelings & Sensations)", items:[
+    { e:"comfortable / uncomfortable", j:"快適 / 不快" },
+    { e:"sore, tight, stiff", j:"痛い、張っている、硬い" },
+    { e:"relaxed", j:"リラックスした" },
+    { e:"ticklish", j:"くすぐったい" },
+    { e:"too hot / too cold", j:"暑すぎる / 寒すぎる" },
+    { e:"soft / medium / hard", j:"弱め / 普通 / 強め" },
+    { e:"a little / a lot", j:"少し / たくさん" },
+    { e:"more / less", j:"もっと / 少なめに" },
+  ]},
+  { grp:"❓ お客様がよく聞くこと (Customer Questions)", items:[
+    { e:"How long is the massage?", j:"→ It's [60] minutes." },
+    { e:"How much is it?", j:"→ It's [price] yen." },
+    { e:"Do you speak English?", j:"→ A little. / Yes, a little." },
+    { e:"Where is the toilet?", j:"→ This way, please." },
+    { e:"Can I use the bathroom first?", j:"→ Of course. Please go ahead." },
+    { e:"Should I take everything off?", j:"→ Please keep your underwear on." },
+    { e:"Do you have oil or dry massage?", j:"→ We do [oil / dry] massage." },
+    { e:"Can I book my next appointment?", j:"→ Yes, please book through our Instagram." },
+    { e:"Do you have Wi-Fi?", j:"→ Yes, the password is ___." },
+  ]},
+];
+
+const TIPS = [
+  { h:"😊 笑顔とジェスチャーを活用しよう",
+    t:"言葉が出てこないときは、指さし・うなずき・実演が大活躍します。スマイルも大切な言葉のひとつです。" },
+  { h:"🙏 「Please」と「Thank you」は魔法の言葉",
+    t:'どんな文章にも "Please" や "Thank you" を添えるだけで、ぐっと丁寧な印象になります。' },
+  { h:'⏸ 詰まったら「One moment, please.」',
+    t:'言葉が出てこないときは "One moment, please." と言えば時間を作れます。慌てなくて大丈夫！' },
+  { h:'❓ 迷ったら「Is this okay?」',
+    t:'"Is this okay?" はほぼどんな場面でも使えます。圧の確認、ポジションの確認、何でもOK。' },
+  { h:"👉 指さしを忘れずに",
+    t:'"Please point to it." と言って、指さしてもらいましょう。言葉がなくても伝わります。' },
+  { h:'🗣 「I\'m sorry, my English isn\'t perfect.」',
+    t:"正直に伝えることで、お客様も親切に接してくれます。完璧を目指さず、伝えようとする姿勢が大切です。" },
+  { h:"🌟 シャドーイングのコツ",
+    t:"音声を聞いたあと、すぐに声に出してリピートします。最初はゆっくり速度から始めましょう。" },
+];
+
+// ── STATE ──
+let S = { tab:'conv', convMode:'listen', convPlaying:false, convIdx:0, phMode:'tap', phPlaying:false, phIdx:0, selCat:-1, speed:1.0 };
+let shadowTimer = null;
+let flatPhrases = [];
+
+// ── SPEECH ──
+function speak(text, cb) {
+  if (!window.speechSynthesis) { alert('音声読み上げに対応していません。SafariまたはChromeをお使いください。'); return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = S.speed; u.pitch = 1.0;
+  const vs = window.speechSynthesis.getVoices();
+  const v = vs.find(v => v.lang==='en-US' && /samantha|karen|moira|female/i.test(v.name))
+    || vs.find(v => v.lang.startsWith('en-US'))
+    || vs.find(v => v.lang.startsWith('en'));
+  if (v) u.voice = v;
+  u.onend = () => { if (cb) cb(); };
+  u.onerror = () => { if (cb) cb(); };
+  window.speechSynthesis.speak(u);
+}
+function stopAll() {
+  window.speechSynthesis && window.speechSynthesis.cancel();
+  if (shadowTimer) { clearInterval(shadowTimer); shadowTimer = null; }
+}
+
+// ── TABS ──
+function showTab(tab) {
+  S.tab = tab; stopConvPlay(); stopPhPlay();
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-'+tab).classList.add('active');
+  ['conv','phrase','vocab','tips'].forEach((t,i) => {
+    if (t===tab) document.querySelectorAll('.tab-btn')[i].classList.add('active');
+  });
+}
+
+// ── SPEED ──
+function setSpeed(spd) {
+  S.speed = spd;
+  document.querySelectorAll('.speed-btn').forEach(b => b.classList.toggle('active', parseFloat(b.dataset.speed)===spd));
+}
+
+// ── SHADOW ──
+function showShadow(pfx, secs, cb) {
+  const el = document.getElementById(pfx+'-shadow');
+  const ct = document.getElementById(pfx+'-count');
+  el.classList.add('show'); let rem = secs; ct.textContent = rem;
+  shadowTimer = setInterval(() => {
+    rem--; ct.textContent = rem;
+    if (rem <= 0) { clearInterval(shadowTimer); shadowTimer = null; el.classList.remove('show'); if (cb) cb(); }
+  }, 1000);
+}
+
+// ── CONVERSATION ──
+function renderConv() {
+  const c = document.getElementById('conv-lines'); c.innerHTML = '';
+  let lastSec = '';
+  CONV.forEach((line, i) => {
+    if (line.sec && line.sec !== lastSec) {
+      lastSec = line.sec;
+      const lbl = document.createElement('div'); lbl.className = 'section-label'; lbl.textContent = line.sec; c.appendChild(lbl);
+    }
+    const el = document.createElement('div');
+    el.className = 'conv-line '+(line.sp==='Y'?'yoko':line.sp==='C'?'customer':'note'); el.id = 'cl-'+i;
+    const dot = document.createElement('div'); dot.className = 'spk-dot'; dot.textContent = line.sp==='N'?'📌':line.sp;
+    const txt = document.createElement('div'); txt.className = 'conv-text'; txt.textContent = line.t;
+    el.appendChild(dot); el.appendChild(txt);
+    if (line.sp !== 'N') el.addEventListener('click', () => { stopConvPlay(); speak(line.t); hlConv(i); });
+    c.appendChild(el);
+  });
+}
+function hlConv(i) {
+  document.querySelectorAll('.conv-line').forEach(e => e.classList.remove('hl'));
+  const el = document.getElementById('cl-'+i);
+  if (el) { el.classList.add('hl'); el.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  document.getElementById('conv-prog').style.width = ((i+1)/CONV.length*100).toFixed(0)+'%';
+  const line = CONV[i];
+  document.getElementById('conv-status').textContent = (line.sp==='Y'?'👩 Yoko':line.sp==='C'?'🧑 Customer':'')+'　'+(i+1)+'/'+CONV.length;
+}
+function setConvMode(m) {
+  S.convMode = m; stopConvPlay();
+  document.getElementById('conv-m-listen').classList.toggle('active', m==='listen');
+  document.getElementById('conv-m-shadow').classList.toggle('active', m==='shadow');
+}
+function toggleConvPlay() { if (S.convPlaying) stopConvPlay(); else startConvPlay(); }
+function startConvPlay() { S.convPlaying = true; S.convIdx = 0; setPlayBtn('conv-play',true); playConvNext(); }
+function stopConvPlay() {
+  S.convPlaying = false; stopAll(); setPlayBtn('conv-play',false);
+  document.getElementById('conv-status').textContent = '▶ で全文再生 / 各行タップで単独再生';
+  document.getElementById('conv-shadow').classList.remove('show');
+  document.querySelectorAll('.conv-line').forEach(e => e.classList.remove('hl'));
+}
+function playConvNext() {
+  if (!S.convPlaying) return;
+  while (S.convIdx < CONV.length && CONV[S.convIdx].sp === 'N') S.convIdx++;
+  if (S.convIdx >= CONV.length) { stopConvPlay(); document.getElementById('conv-status').textContent='✅ 完了！お疲れ様でした！'; return; }
+  const line = CONV[S.convIdx]; hlConv(S.convIdx);
+  speak(line.t, () => {
+    if (!S.convPlaying) return;
+    if (S.convMode === 'shadow') {
+      showShadow('conv', 4, () => { if (!S.convPlaying) return; S.convIdx++; playConvNext(); });
+    } else {
+      setTimeout(() => { if (!S.convPlaying) return; S.convIdx++; playConvNext(); }, 700);
+    }
+  });
+}
+
+// ── PHRASES ──
+function renderCats() {
+  const c = document.getElementById('cat-list'); c.innerHTML = '';
+  CATS.forEach((cat, i) => {
+    const cnt = cat.ph ? cat.ph.length : cat.subs.reduce((s,sub)=>s+sub.ph.length,0);
+    const el = document.createElement('div'); el.className = 'cat-card';
+    el.innerHTML = `<div class="cat-icon">${cat.icon}</div><div class="cat-info"><div class="cat-title">${cat.title}</div><div class="cat-sub">${cat.ja} · ${cnt}フレーズ</div></div><div class="cat-arrow">›</div>`;
+    el.addEventListener('click', () => openCat(i)); c.appendChild(el);
+  });
+}
+function openCat(i) {
+  S.selCat = i; S.phMode = 'tap'; S.phPlaying = false; S.phIdx = 0;
+  const cat = CATS[i];
+  document.getElementById('ph-title').textContent = cat.icon+' '+cat.ja;
+  flatPhrases = cat.ph ? cat.ph : cat.subs.flatMap(s => s.ph);
+  setPhMode('tap'); renderPhraseList(cat);
+  document.getElementById('cat-view').classList.add('hide');
+  document.getElementById('phrase-view').classList.add('show');
+  window.scrollTo(0,0);
+}
+function renderPhraseList(cat) {
+  const c = document.getElementById('ph-list'); c.innerHTML = ''; let idx = 0;
+  if (cat.ph) { cat.ph.forEach((p,i) => c.appendChild(mkPhItem(p,i))); }
+  else if (cat.subs) {
+    cat.subs.forEach(sub => {
+      const hd = document.createElement('div'); hd.className = 'phrase-sub-hd'; hd.textContent = sub.lbl; c.appendChild(hd);
+      sub.ph.forEach(p => { c.appendChild(mkPhItem(p, idx++)); });
+    });
+  }
+}
+function mkPhItem(p, i) {
+  const el = document.createElement('div'); el.className = 'phrase-item'; el.id = 'pi-'+i;
+  const td = document.createElement('div'); td.className = 'phrase-text';
+  const en = document.createElement('div'); en.className = 'ph-en'; en.textContent = p.e; td.appendChild(en);
+  if (p.n) { const n = document.createElement('div'); n.className = 'ph-note'; n.textContent = p.n; td.appendChild(n); }
+  const ic = document.createElement('div'); ic.className = 'ph-icon'; ic.textContent = '🔊';
+  el.appendChild(td); el.appendChild(ic);
+  el.addEventListener('click', () => { stopPhPlay(); hlPh(i); speak(p.e); });
+  return el;
+}
+function hlPh(i) {
+  document.querySelectorAll('.phrase-item').forEach(e => e.classList.remove('hl'));
+  const el = document.getElementById('pi-'+i);
+  if (el) { el.classList.add('hl'); el.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  const prog = document.getElementById('ph-prog'); if (prog) prog.style.width = ((i+1)/flatPhrases.length*100).toFixed(0)+'%';
+  const st = document.getElementById('ph-status'); if (st) st.textContent = (i+1)+'/'+flatPhrases.length;
+}
+function setPhMode(m) {
+  S.phMode = m; stopPhPlay();
+  ['listen','shadow','tap'].forEach(x => { const b = document.getElementById('ph-m-'+x); if (b) b.classList.toggle('active', x===m); });
+  const pb = document.getElementById('ph-play'); if (pb) pb.style.display = m==='tap' ? 'none' : 'flex';
+  const st = document.getElementById('ph-status'); if (st) st.textContent = m==='tap' ? 'フレーズをタップして再生' : 'タップして再生';
+}
+function togglePhPlay() { if (S.phPlaying) stopPhPlay(); else startPhPlay(); }
+function startPhPlay() { S.phPlaying = true; S.phIdx = 0; setPlayBtn('ph-play',true); playPhNext(); }
+function stopPhPlay() {
+  S.phPlaying = false; stopAll(); setPlayBtn('ph-play',false);
+  document.getElementById('ph-shadow').classList.remove('show');
+  document.querySelectorAll('.phrase-item').forEach(e => e.classList.remove('hl'));
+  const p = document.getElementById('ph-prog'); if (p) p.style.width='0%';
+  const st = document.getElementById('ph-status'); if (st && S.phMode!=='tap') st.textContent='タップして再生';
+}
+function playPhNext() {
+  if (!S.phPlaying) return;
+  if (S.phIdx >= flatPhrases.length) { stopPhPlay(); const st=document.getElementById('ph-status'); if(st) st.textContent='✅ 完了！'; return; }
+  const p = flatPhrases[S.phIdx]; hlPh(S.phIdx);
+  speak(p.e, () => {
+    if (!S.phPlaying) return;
+    if (S.phMode === 'shadow') {
+      showShadow('ph', 4, () => { if (!S.phPlaying) return; S.phIdx++; playPhNext(); });
+    } else {
+      setTimeout(() => { if (!S.phPlaying) return; S.phIdx++; playPhNext(); }, 700);
+    }
+  });
+}
+function backToCats() {
+  stopPhPlay();
+  document.getElementById('cat-view').classList.remove('hide');
+  document.getElementById('phrase-view').classList.remove('show');
+  window.scrollTo(0,0);
+}
+
+// ── VOCAB ──
+function renderVocab() {
+  const c = document.getElementById('vocab-list');
+  VOCAB.forEach(g => {
+    const sec = document.createElement('div'); sec.className = 'vocab-group';
+    const t = document.createElement('div'); t.className = 'vocab-group-title'; t.textContent = g.grp; sec.appendChild(t);
+    g.items.forEach(item => {
+      const el = document.createElement('div'); el.className = 'vocab-item';
+      el.innerHTML = `<div class="vocab-en">${item.e}</div><div class="vocab-ja">${item.j}</div><div class="vocab-icon">🔊</div>`;
+      el.addEventListener('click', () => speak(item.e)); sec.appendChild(el);
+    });
+    c.appendChild(sec);
+  });
+}
+
+// ── TIPS ──
+function renderTips() {
+  const c = document.getElementById('tips-list');
+  TIPS.forEach(tip => {
+    const el = document.createElement('div'); el.className = 'tip-card';
+    el.innerHTML = `<h3>${tip.h}</h3><p>${tip.t}</p>`; c.appendChild(el);
+  });
+}
+
+// ── HELPERS ──
+function setPlayBtn(id, playing) {
+  const b = document.getElementById(id); if (!b) return;
+  b.textContent = playing ? '⏹' : '▶';
+  b.classList.toggle('stop-btn', playing); b.classList.toggle('play-btn', !playing);
+}
+
+// ── INIT ──
+window.addEventListener('load', () => {
+  renderConv(); renderCats(); renderVocab(); renderTips();
+  if (window.speechSynthesis) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  }
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
+});
+</script>
+</body>
+</html>
